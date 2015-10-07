@@ -50,4 +50,10 @@ public class Position {
                 ", col=" + col +
                 '}';
     }
+
+    public boolean equals(Position position) {
+        return this.getCol() == position.getCol() &&
+                this.getRow() == position.getRow();
+    }
+
 }
