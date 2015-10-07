@@ -12,10 +12,15 @@ public class Food {
 
     private boolean isOnField;
     Position position;
+    Rectangle gameFood;
+
+    public Food(){
+
+    }
 
     public void createFood() {
         position = new Position();
-        Rectangle gameFood = new Rectangle(position.getCol() * Map.getCellSize(),
+        gameFood = new Rectangle(position.getCol() * Map.getCellSize(),
                 position.getRow() * Map.getCellSize(),
                 Map.getCellSize(),
                 Map.getCellSize());
@@ -23,6 +28,12 @@ public class Food {
         gameFood.setColor(Color.WHITE);
         gameFood.fill();
         setIsOnField(true);
+    }
+
+    public void removeFood(){
+        gameFood.delete();
+        setIsOnField(false);
+
     }
 
     public boolean isOnField() {

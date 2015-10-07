@@ -1,5 +1,6 @@
 package org.academia.latehours;
 
+import org.academia.latehours.crashdetector.CrashDetector;
 import org.academia.latehours.maps.Map;
 import org.academia.latehours.objects.Food;
 import org.academia.latehours.snake.Directions;
@@ -19,6 +20,7 @@ public class Game implements KeyboardHandler{
     Snake snake;
     Food food;
     Keyboard k;
+    CrashDetector crashDetector = new CrashDetector();
     
 
     public void init() {
@@ -26,21 +28,28 @@ public class Game implements KeyboardHandler{
         map = new Map(50, 20);
         snake = new Snake();
         food = new Food();
+
+
     }
 
     public void start() throws InterruptedException {
 
+
+
         while(true){
 
-            if(!food.isOnField()) {
-                food.createFood();
-            }
-            Thread.sleep(50);
+            Thread.sleep(150);
             snake.move();
+            snake.setEating(false);
             if(!food.isOnField()) {
                 food.createFood();
             }
+            if(crashDetector.collision(snake, food)){
 
+                snake.setEating(true);
+                food.removeFood();
+                System.out.println("Impact!");
+            }
         }
     }
 
