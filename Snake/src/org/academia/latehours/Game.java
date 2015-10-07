@@ -5,7 +5,9 @@ import org.academia.latehours.maps.Map;
 import org.academia.latehours.objects.Food;
 import org.academia.latehours.snake.Directions;
 import org.academia.latehours.snake.Snake;
+import org.academiadecodigo.simplegraphics.graphics.Color;
 import org.academiadecodigo.simplegraphics.graphics.Rectangle;
+import org.academiadecodigo.simplegraphics.graphics.Text;
 import org.academiadecodigo.simplegraphics.keyboard.Keyboard;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardEvent;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardEventType;
@@ -23,19 +25,30 @@ public class Game implements KeyboardHandler{
     Food food;
     Keyboard k;
     CrashDetector crashDetector = new CrashDetector();
+    Score score = new Score();
     boolean play = true;
+
     
 
     public void init() {
         setKeyboard();
-        map = new Map(50, 30);
+        map = new Map(30, 30);
         snake = new Snake();
         food = new Food();
-
     }
 
     public void start() throws InterruptedException {
         init();
+        score.currentScore = 0;
+
+        Text currentScore = new Text(0, 0, "Score: " + score.currentScore);
+        currentScore.setColor(Color.WHITE);
+        currentScore.draw();
+
+        Text currentHighscore = new Text (0, 10, "Highscore: " + score.getHighScore());
+        currentHighscore.setColor(Color.WHITE);
+        currentHighscore.draw();
+
         while (!snake.isDead()) {
 
             Thread.sleep(50);
@@ -47,10 +60,18 @@ public class Game implements KeyboardHandler{
             if (crashDetector.checkEating(snake, food)) {
                 snake.setEating(true);
                 food.removeFood();
+                score.currentScore += food.getFoodScore();
+                currentScore.setText("Score: " + score.currentScore);
+                if(score.currentScore > score.getHighScore()) {
+                    score.setHighScore(score.currentScore);
+                    currentHighscore.setText("Highscore: " + score.getHighScore());
+                }
                 System.out.println("Impact!");
             }
             if (crashDetector.selfDestruct(snake)) {
                 snake.setDead(true);
+                currentScore.delete();
+                currentHighscore.delete();
                 System.out.println("You have died!");
             }
         }
@@ -61,7 +82,7 @@ public class Game implements KeyboardHandler{
         while(true) {
             if(play) {
                 start();
-                gameOver();
+                gameOverScreen();
                 play = false;
             }
             if(!play) {
@@ -71,12 +92,20 @@ public class Game implements KeyboardHandler{
         }
     }
 
-    public void gameOver() {
+    public void gameOverScreen() {
         Picture gameOver = new Picture(0, 0, "Snake/resources/gameover.jpg");
         int x = gameOver.getMaxX();
         int y = gameOver.getMaxY();
         gameOver.translate((Map.getCols() * Map.getCellSize() - x)/2, (Map.getRows() * Map.getCellSize() - y)/2);
         gameOver.draw();
+
+        Text gameScore = new Text (0, 0, "You scored: " + score.currentScore + " points!");
+        gameScore.setColor(Color.WHITE);
+        gameScore.draw();
+
+        Text gameSessionHighscore = new Text(0, 10, "The current highscore is: " + score.getHighScore() + " points!");
+        gameSessionHighscore.setColor(Color.WHITE);
+        gameSessionHighscore.draw();
     }
 
     private void setKeyboard() {

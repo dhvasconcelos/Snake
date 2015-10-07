@@ -11,11 +11,12 @@ import org.academiadecodigo.simplegraphics.graphics.Rectangle;
 public class Food {
 
     private boolean isOnField;
+    private int foodScore = 10;
     Position position;
     Rectangle gameFood;
 
-    public Food(){
-
+    public int getFoodScore() {
+        return foodScore;
     }
 
     public void createFood() {
