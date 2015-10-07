@@ -18,6 +18,7 @@ public class Snake {
     LinkedList<BodyParts> snakeBody;
     private Directions direction = Directions.LEFT;
     private boolean eating;
+    private boolean dead;
 
     public Snake() {
         snakeBody = new LinkedList<>();
@@ -51,7 +52,19 @@ public class Snake {
         return eating;
     }
 
+    public boolean isDead() {
+        return dead;
+    }
+
+    public void setDead(boolean dead) {
+        this.dead = dead;
+    }
+
     public void move() {
+        if(dead) {
+            return;
+        }
+        
         if (!eating) {
             removeBodyPart();
         }
@@ -115,12 +128,18 @@ public class Snake {
             bodyDrawing.setColor(Color.GREEN);
             bodyDrawing.fill();
         }
+
     }
 
     public Position headPosition(){
         int size = snakeBody.size() - 1;
         return new Position(snakeBody.get(size).position.getCol(),
                 snakeBody.get(size).position.getRow());
+    }
+
+    public Position bodyPartPosition(int index) {
+        return new Position(snakeBody.get(index).position.getCol(),
+                snakeBody.get(index).position.getRow());
     }
 
     public LinkedList<BodyParts> getSnakeBody() {
