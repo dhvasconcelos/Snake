@@ -12,15 +12,15 @@ public class Food {
 
     private boolean isOnField;
     private int foodScore = 10;
-    Position position;
-    Rectangle gameFood;
+    private Position position;
+    private Rectangle gameFood;
 
     public int getFoodScore() {
         return foodScore;
     }
 
-    public void createFood() {
-        position = new Position();
+    public void createFood(Position position) {
+        this.position = position;
         gameFood = new Rectangle(position.getCol() * Map.getCellSize(),
                 position.getRow() * Map.getCellSize(),
                 Map.getCellSize(),
@@ -31,10 +31,9 @@ public class Food {
         setIsOnField(true);
     }
 
-    public void removeFood(){
+    public void removeFood() {
         gameFood.delete();
         setIsOnField(false);
-
     }
 
     public boolean isOnField() {

@@ -15,20 +15,20 @@ import java.util.LinkedList;
 
 public class Snake {
 
-    LinkedList<BodyParts> snakeBody;
+    private LinkedList<BodyParts> snakeBody;
     private Directions direction = Directions.LEFT;
     private boolean eating;
     private boolean dead;
 
     public Snake() {
         snakeBody = new LinkedList<>();
-        BodyParts snakeHead = new BodyParts(Map.getCols()/2, Map.getRows()/2);
+        BodyParts snakeHead = new BodyParts(Map.getCols() / 2, Map.getRows() / 2);
 
         for (int i = 3; i > 0; i--) {
             BodyParts bodyPart = new BodyParts(snakeHead.position.getCol() + i,
                     snakeHead.position.getRow());
 
-            System.out.println("For bodyPart " + bodyPart.position);
+            //System.out.println("For bodyPart " + bodyPart.position);
             snakeBody.add(bodyPart);
         }
 
@@ -60,11 +60,15 @@ public class Snake {
         this.dead = dead;
     }
 
+    public int snakeSize() {
+        return snakeBody.size();
+    }
+
     public void move() {
-        if(dead) {
+        if (dead) {
             return;
         }
-        
+
         if (!eating) {
             removeBodyPart();
         }
@@ -109,17 +113,17 @@ public class Snake {
                 break;
         }
 
-        System.out.println(bodyPart.position);
+        //System.out.println(bodyPart.position);
         snakeBody.add(bodyPart);
     }
 
 
-    static class BodyParts {
-        Position position;
-        Rectangle bodyDrawing;
+    private class BodyParts {
+        private Position position;
+        private Rectangle bodyDrawing;
 
         public BodyParts(int col, int row) {
-            this.position = new Position (col,row);
+            this.position = new Position(col, row);
             bodyDrawing = new Rectangle(position.getCol() * Map.getCellSize(),
                     position.getRow() * Map.getCellSize(),
                     Map.getCellSize(),
@@ -131,8 +135,8 @@ public class Snake {
 
     }
 
-    public Position headPosition(){
-        int size = snakeBody.size() - 1;
+    public Position headPosition() {
+        int size = snakeSize() - 1;
         return new Position(snakeBody.get(size).position.getCol(),
                 snakeBody.get(size).position.getRow());
     }

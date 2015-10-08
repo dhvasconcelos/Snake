@@ -7,7 +7,6 @@ import org.academia.latehours.maps.Map;
  */
 public class Position {
 
-
     private int row;
     private int col;
 

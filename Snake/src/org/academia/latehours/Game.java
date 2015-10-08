@@ -3,6 +3,7 @@ package org.academia.latehours;
 import org.academia.latehours.crashdetector.CrashDetector;
 import org.academia.latehours.maps.Map;
 import org.academia.latehours.objects.Food;
+import org.academia.latehours.position.Position;
 import org.academia.latehours.snake.Directions;
 import org.academia.latehours.snake.Snake;
 import org.academiadecodigo.simplegraphics.graphics.Color;
@@ -19,16 +20,18 @@ import java.util.LinkedList;
 /**
  * Created by cadet on 06/10/15.
  */
-public class Game implements KeyboardHandler{
-    Map map;
-    Snake snake;
-    Food food;
-    Keyboard k;
-    CrashDetector crashDetector = new CrashDetector();
-    Score score = new Score();
-    boolean play = true;
+public class Game implements KeyboardHandler {
 
-    
+    private Map map;
+    private Snake snake;
+    private Food food;
+    private Keyboard k;
+    private CrashDetector crashDetector = new CrashDetector();
+    private Score score = new Score();
+    private boolean play = true;
+    private Text currentScore;
+    private Text currentHighscore;
+
 
     public void init() {
         setKeyboard();
@@ -37,69 +40,84 @@ public class Game implements KeyboardHandler{
         food = new Food();
     }
 
-    public void start() throws InterruptedException {
-        init();
-        score.currentScore = 0;
 
-        Text currentScore = new Text(0, 0, "Score: " + score.currentScore);
+    public void start() {
+        init();
+        score.setCurrentScore(0);
+
+        currentScore = new Text(0, 0, "Score: " + score.getCurrentScore());
         currentScore.setColor(Color.WHITE);
         currentScore.draw();
 
-        Text currentHighscore = new Text (0, 10, "Highscore: " + score.getHighScore());
+        currentHighscore = new Text(0, 10, "Highscore: " + score.getHighScore());
         currentHighscore.setColor(Color.WHITE);
         currentHighscore.draw();
+    }
+
+
+    public void gameLoop() throws InterruptedException {
 
         while (!snake.isDead()) {
 
             Thread.sleep(50);
             snake.move();
             snake.setEating(false);
+
             if (!food.isOnField()) {
-                food.createFood();
+                Position position = new Position();
+                while (crashDetector.isOccupied(position, snake)) {
+                    position = new Position();
+                }
+                food.createFood(position);
             }
+
             if (crashDetector.checkEating(snake, food)) {
                 snake.setEating(true);
                 food.removeFood();
-                score.currentScore += food.getFoodScore();
-                currentScore.setText("Score: " + score.currentScore);
-                if(score.currentScore > score.getHighScore()) {
-                    score.setHighScore(score.currentScore);
+                score.setCurrentScore(score.getCurrentScore() + food.getFoodScore());
+                currentScore.setText("Score: " + score.getCurrentScore());
+                if (score.getCurrentScore() > score.getHighScore()) {
+                    score.setHighScore(score.getCurrentScore());
                     currentHighscore.setText("Highscore: " + score.getHighScore());
                 }
-                System.out.println("Impact!");
+                //System.out.println("Impact!");
             }
+
             if (crashDetector.selfDestruct(snake)) {
                 snake.setDead(true);
+
                 currentScore.delete();
                 currentHighscore.delete();
                 System.out.println("You have died!");
             }
         }
-
     }
 
+
     public void run() throws InterruptedException {
-        while(true) {
-            if(play) {
+        while (true) {
+            if (play) {
                 start();
+                gameLoop();
                 gameOverScreen();
                 play = false;
             }
-            if(!play) {
+            if (!play) {
                 Thread.sleep(500);
                 continue;
             }
         }
     }
 
+
     public void gameOverScreen() {
         Picture gameOver = new Picture(0, 0, "Snake/resources/gameover.jpg");
         int x = gameOver.getMaxX();
         int y = gameOver.getMaxY();
-        gameOver.translate((Map.getCols() * Map.getCellSize() - x)/2, (Map.getRows() * Map.getCellSize() - y)/2);
+        gameOver.translate((Map.getCols() * Map.getCellSize() - x) / 2, (Map.getRows() * Map.getCellSize() - y) / 2);
         gameOver.draw();
 
-        Text gameScore = new Text (0, 0, "You scored: " + score.currentScore + " points!");
+        Text gameScore = new Text(0, 0, "You scored: " + score.getCurrentScore() + " points!");
         gameScore.setColor(Color.WHITE);
         gameScore.draw();
 
@@ -107,6 +125,7 @@ public class Game implements KeyboardHandler{
         gameSessionHighscore.setColor(Color.WHITE);
         gameSessionHighscore.draw();
     }
+
 
     private void setKeyboard() {
         k = new Keyboard(this);
@@ -122,12 +141,10 @@ public class Game implements KeyboardHandler{
         events[3].setKey(KeyboardEvent.KEY_RIGHT);
         events[4].setKey(KeyboardEvent.KEY_R);
 
-
         for (KeyboardEvent event : events) {
             event.setKeyboardEventType(KeyboardEventType.KEY_PRESSED);
             k.addEventListener(event);
         }
-
     }
 
 

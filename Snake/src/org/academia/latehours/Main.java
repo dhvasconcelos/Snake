@@ -5,7 +5,7 @@ package org.academia.latehours;
  */
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException{
+    public static void main(String[] args) throws InterruptedException {
         Game g = new Game();
 
         g.run();
