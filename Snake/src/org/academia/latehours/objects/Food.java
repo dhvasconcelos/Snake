@@ -6,27 +6,40 @@ import org.academiadecodigo.simplegraphics.graphics.Color;
 import org.academiadecodigo.simplegraphics.graphics.Rectangle;
 
 /**
- * Created by cadet on 06/10/15.
+ * Created by cadet on 08/10/15.
  */
-public class Food {
+public abstract class Food {
 
     private boolean isOnField;
-    private int foodScore = 10;
+    private int foodScore;
     private Position position;
     private Rectangle gameFood;
+    private Color color = Color.WHITE;
 
     public int getFoodScore() {
         return foodScore;
     }
 
-    public void createFood(Position position) {
+    public void setFoodScore(int foodScore) {
+        this.foodScore = foodScore;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public void placeFood(Position position) {
         this.position = position;
         gameFood = new Rectangle(position.getCol() * Map.getCellSize(),
                 position.getRow() * Map.getCellSize(),
                 Map.getCellSize(),
                 Map.getCellSize());
 
-        gameFood.setColor(Color.WHITE);
+        gameFood.setColor(color);
         gameFood.fill();
         setIsOnField(true);
     }
@@ -47,4 +60,6 @@ public class Food {
     public Position getPosition() {
         return position;
     }
+
 }
+

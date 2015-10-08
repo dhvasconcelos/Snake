@@ -3,19 +3,18 @@ package org.academia.latehours;
 import org.academia.latehours.crashdetector.CrashDetector;
 import org.academia.latehours.maps.Map;
 import org.academia.latehours.objects.Food;
+import org.academia.latehours.objects.NormalFood;
+import org.academia.latehours.objects.SpecialFood;
 import org.academia.latehours.position.Position;
 import org.academia.latehours.snake.Directions;
 import org.academia.latehours.snake.Snake;
 import org.academiadecodigo.simplegraphics.graphics.Color;
-import org.academiadecodigo.simplegraphics.graphics.Rectangle;
 import org.academiadecodigo.simplegraphics.graphics.Text;
 import org.academiadecodigo.simplegraphics.keyboard.Keyboard;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardEvent;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardEventType;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardHandler;
 import org.academiadecodigo.simplegraphics.pictures.Picture;
-
-import java.util.LinkedList;
 
 /**
  * Created by cadet on 06/10/15.
@@ -37,7 +36,7 @@ public class Game implements KeyboardHandler {
         setKeyboard();
         map = new Map(30, 30);
         snake = new Snake();
-        food = new Food();
+        food = createFood();
     }
 
 
@@ -68,7 +67,8 @@ public class Game implements KeyboardHandler {
                 while (crashDetector.isOccupied(position, snake)) {
                     position = new Position();
                 }
-                food.createFood(position);
+                food = createFood();
+                food.placeFood(position);
             }
 
             if (crashDetector.checkEating(snake, food)) {
@@ -124,6 +124,11 @@ public class Game implements KeyboardHandler {
         Text gameSessionHighscore = new Text(0, 10, "The current highscore is: " + score.getHighScore() + " points!");
         gameSessionHighscore.setColor(Color.WHITE);
         gameSessionHighscore.draw();
+    }
+
+
+    public Food createFood() {
+         return Math.random() > 0.94 ? new SpecialFood() : new NormalFood();
     }
 
 

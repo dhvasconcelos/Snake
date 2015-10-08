@@ -5,7 +5,6 @@ import org.academia.latehours.position.Position;
 import org.academiadecodigo.simplegraphics.graphics.Color;
 import org.academiadecodigo.simplegraphics.graphics.Rectangle;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 

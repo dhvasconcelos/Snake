@@ -4,6 +4,6 @@ Snake game created in Academia de Código.
 
 Library SimpleGraphics https://bitbucket.org/unixcornios/simple-graphics
 
-Basic gamplay implemented;
+Basic gameplay implemented;
 
 No features added yet.
