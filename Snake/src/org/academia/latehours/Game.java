@@ -2,9 +2,7 @@ package org.academia.latehours;
 
 import org.academia.latehours.crashdetector.CrashDetector;
 import org.academia.latehours.maps.Map;
-import org.academia.latehours.objects.Food;
-import org.academia.latehours.objects.NormalFood;
-import org.academia.latehours.objects.SpecialFood;
+import org.academia.latehours.objects.*;
 import org.academia.latehours.position.Position;
 import org.academia.latehours.snake.Directions;
 import org.academia.latehours.snake.Snake;
@@ -31,6 +29,9 @@ public class Game implements KeyboardHandler {
     private boolean play = true;
     private Text currentScore;
     private Text currentHighscore;
+    private static Text selfCrossLeft;
+    private static int currentGameSleep = 50;
+    private int initialGameSleep = 50;
 
 
     public void init() {
@@ -52,14 +53,16 @@ public class Game implements KeyboardHandler {
         currentHighscore = new Text(100, 0, "HIGHSCORE: " + score.getHighScore());
         currentHighscore.setColor(Color.GREEN);
         currentHighscore.draw();
+
+        selfCrossLeft = new Text(500, 0, "SNAKECROSS: " + Snake.getSelfCross());
+        selfCrossLeft.setColor(Color.GREEN);
+        selfCrossLeft.draw();
     }
 
 
     public void gameLoop() throws InterruptedException {
-
         while (!snake.isDead()) {
-
-            Thread.sleep(50);
+            Thread.sleep(currentGameSleep);
             snake.move();
             snake.setEating(false);
 
@@ -76,20 +79,32 @@ public class Game implements KeyboardHandler {
                 snake.setEating(true);
                 food.removeFood();
                 score.setCurrentScore(score.getCurrentScore() + food.getFoodScore());
-                currentScore.setText("Score: " + score.getCurrentScore());
+                currentScore.setText("SCORE: " + score.getCurrentScore());
+
+                if (food instanceof PowerUp) {
+                    ((PowerUp) food).powerup();
+                } else {
+                    if (currentGameSleep < initialGameSleep) {
+                        currentGameSleep = initialGameSleep;
+                        Snake.setSpeedUp(false);
+                    }
+                }
+
                 if (score.getCurrentScore() > score.getHighScore()) {
                     score.setHighScore(score.getCurrentScore());
-                    currentHighscore.setText("Highscore: " + score.getHighScore());
+                    currentHighscore.setText("HIGHSCORE: " + score.getHighScore());
                 }
                 //System.out.println("Impact!");
             }
 
             if (crashDetector.selfDestruct(snake)) {
-                snake.setDead(true);
-
-                currentScore.delete();
-                currentHighscore.delete();
-                System.out.println("You have died!");
+                if (Snake.getSelfCross() <= 0) {
+                    snake.setDead(true);
+                    System.out.println("You have died!");
+                } else {
+                    Snake.setSelfCross(Snake.getSelfCross() - 1);
+                    updateSelfCrossText();
+                }
             }
         }
     }
@@ -103,6 +118,7 @@ public class Game implements KeyboardHandler {
                 gameOverScreen();
                 play = false;
             }
+
             if (!play) {
                 Thread.sleep(500);
                 continue;
@@ -112,6 +128,10 @@ public class Game implements KeyboardHandler {
 
 
     public void gameOverScreen() {
+        currentScore.delete();
+        currentHighscore.delete();
+        selfCrossLeft.delete();
+
         Picture gameOver = new Picture(0, 0, "Snake/resources/gameover.jpg");
         int x = gameOver.getMaxX();
         int y = gameOver.getMaxY();
@@ -129,7 +149,25 @@ public class Game implements KeyboardHandler {
 
 
     public Food createFood() {
-         return Math.random() > 0.94 ? new SpecialFood() : new NormalFood();
+        if (Math.random() < 0.9) {
+            return Math.random() > 0.95 ? new RareFood() : new NormalFood();
+        } else {
+            return Math.random() > 0.3 ? new SpeedUp() : new CrossSnake();
+        }
+    }
+
+
+    public static void setCurrentGameSleep(int currentGameSleep) {
+        Game.currentGameSleep = currentGameSleep;
+    }
+
+    public static int getCurrentGameSleep() {
+        return currentGameSleep;
+    }
+
+
+    public static void updateSelfCrossText() {
+        selfCrossLeft.setText("SELFCROSS: " + Snake.getSelfCross());
     }
 
 
@@ -190,4 +228,5 @@ public class Game implements KeyboardHandler {
     public void keyReleased(KeyboardEvent keyboardEvent) {
 
     }
+
 }

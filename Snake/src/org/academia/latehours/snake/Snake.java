@@ -18,6 +18,9 @@ public class Snake {
     private Directions direction = Directions.LEFT;
     private boolean eating;
     private boolean dead;
+    private static boolean speedUp;
+    private static int selfCross;
+
 
     public Snake() {
         snakeBody = new LinkedList<>();
@@ -128,7 +131,8 @@ public class Snake {
                     Map.getCellSize(),
                     Map.getCellSize());
 
-            bodyDrawing.setColor(Color.GREEN);
+            Color color = speedUp ? Color.RED : Color.GREEN;
+            bodyDrawing.setColor(color);
             bodyDrawing.fill();
         }
 
@@ -143,6 +147,22 @@ public class Snake {
     public Position bodyPartPosition(int index) {
         return new Position(snakeBody.get(index).position.getCol(),
                 snakeBody.get(index).position.getRow());
+    }
+
+    public static int getSelfCross() {
+        return selfCross;
+    }
+
+    public static void setSelfCross(int selfCross) {
+        Snake.selfCross = selfCross;
+    }
+
+    public static boolean isSpeedUp() {
+        return speedUp;
+    }
+
+    public static void setSpeedUp(boolean speedUp) {
+        Snake.speedUp = speedUp;
     }
 
     public LinkedList<BodyParts> getSnakeBody() {
