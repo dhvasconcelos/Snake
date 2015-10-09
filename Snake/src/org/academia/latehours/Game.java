@@ -19,6 +19,7 @@ import org.academiadecodigo.simplegraphics.pictures.Picture;
 /**
  * Created by cadet on 06/10/15.
  */
+
 public class Game implements KeyboardHandler {
 
     private Map map;
@@ -44,12 +45,12 @@ public class Game implements KeyboardHandler {
         init();
         score.setCurrentScore(0);
 
-        currentScore = new Text(0, 0, "Score: " + score.getCurrentScore());
-        currentScore.setColor(Color.WHITE);
+        currentScore = new Text(0, 0, "SCORE: " + score.getCurrentScore());
+        currentScore.setColor(Color.GREEN);
         currentScore.draw();
 
-        currentHighscore = new Text(0, 10, "Highscore: " + score.getHighScore());
-        currentHighscore.setColor(Color.WHITE);
+        currentHighscore = new Text(100, 0, "HIGHSCORE: " + score.getHighScore());
+        currentHighscore.setColor(Color.GREEN);
         currentHighscore.draw();
     }
 
