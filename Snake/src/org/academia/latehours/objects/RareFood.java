@@ -9,7 +9,7 @@ public class RareFood extends Food{
 
     public RareFood() {
         super();
-        setFoodScore(75);
+        setFoodScore(150);
         setColor(Color.MAGENTA);
     }
 

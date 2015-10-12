@@ -8,10 +8,16 @@ import org.academiadecodigo.simplegraphics.graphics.Rectangle;
  */
 public class Map {
 
-    private static int rows;
-    private static int cols;
+    private static int rows = 30;
+    private static int cols = 30;
     private static int cellSize = 20;
     private Rectangle gameBoard;
+
+    public Map() {
+        this.gameBoard = new Rectangle(0, 0, cols * cellSize, rows * cellSize);
+        this.gameBoard.setColor(Color.BLACK);
+        this.gameBoard.fill();
+    }
 
     public Map(int cols, int rows) {
         this.rows = rows;

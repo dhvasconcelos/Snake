@@ -14,6 +14,10 @@ import org.academiadecodigo.simplegraphics.keyboard.KeyboardEventType;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardHandler;
 import org.academiadecodigo.simplegraphics.pictures.Picture;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 /**
  * Created by cadet on 06/10/15.
  */
@@ -27,18 +31,24 @@ public class Game implements KeyboardHandler {
     private CrashDetector crashDetector = new CrashDetector();
     private Score score = new Score();
     private boolean play = true;
+    private boolean pause = false;
     private Text currentScore;
     private Text currentHighscore;
     private static Text selfCrossLeft;
-    private static int currentGameSleep = 50;
-    private int initialGameSleep = 50;
+    private static int currentGameDelay = 75;
+    private static Timer gameTimer;
+    private static Timer keyboardTimer;
+    private MovementQueue movement;
 
 
     public void init() {
-        setKeyboard();
-        map = new Map(30, 30);
+        if(k == null) {
+            setKeyboard();
+        }
+        map = new Map();
         snake = new Snake();
         food = createFood();
+        movement = new MovementQueue();
     }
 
 
@@ -59,71 +69,47 @@ public class Game implements KeyboardHandler {
         selfCrossLeft.draw();
     }
 
+    private void moveTimer() {
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                snake.move();
+                snake.setEating(false);
 
-    public void gameLoop() throws InterruptedException {
-        while (!snake.isDead()) {
-            Thread.sleep(currentGameSleep);
-            snake.move();
-            snake.setEating(false);
+                foodPlacer();
+                eatingCheck();
+                selfCrashCheck();
 
-            if (!food.isOnField()) {
-                Position position = new Position();
-                while (crashDetector.isOccupied(position, snake)) {
-                    position = new Position();
+                if(snake.isDead()) {
+                    gameOverScreen();
+                    play = false;
+                    gameTimer.stop();
                 }
-                food = createFood();
-                food.placeFood(position);
+
             }
+        };
+        gameTimer = new Timer(currentGameDelay, actionListener);
+        gameTimer.start();
+    }
 
-            if (crashDetector.checkEating(snake, food)) {
-                snake.setEating(true);
-                food.removeFood();
-                score.setCurrentScore(score.getCurrentScore() + food.getFoodScore());
-                currentScore.setText("SCORE: " + score.getCurrentScore());
-
-                if (food instanceof PowerUp) {
-                    ((PowerUp) food).powerup();
-                } else {
-                    if (currentGameSleep < initialGameSleep) {
-                        currentGameSleep = initialGameSleep;
-                        Snake.setSpeedUp(false);
-                    }
-                }
-
-                if (score.getCurrentScore() > score.getHighScore()) {
-                    score.setHighScore(score.getCurrentScore());
-                    currentHighscore.setText("HIGHSCORE: " + score.getHighScore());
-                }
-                //System.out.println("Impact!");
-            }
-
-            if (crashDetector.selfDestruct(snake)) {
-                if (Snake.getSelfCross() <= 0) {
-                    snake.setDead(true);
-                    System.out.println("You have died!");
-                } else {
-                    Snake.setSelfCross(Snake.getSelfCross() - 1);
-                    updateSelfCrossText();
+    private void keyboardTimer() {
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(movement.size() != 0) {
+                    movement.movementTranslator(movement.poll(), snake);
                 }
             }
-        }
+        };
+        keyboardTimer = new Timer(currentGameDelay, actionListener);
+        keyboardTimer.start();
     }
 
 
     public void run() throws InterruptedException {
-        while (true) {
-            if (play) {
-                start();
-                gameLoop();
-                gameOverScreen();
-                play = false;
-            }
-
-            if (!play) {
-                Thread.sleep(500);
-                continue;
-            }
-        }
+        start();
+        moveTimer();
+        keyboardTimer();
     }
 
 
@@ -138,12 +124,12 @@ public class Game implements KeyboardHandler {
         gameOver.translate((Map.getCols() * Map.getCellSize() - x) / 2, (Map.getRows() * Map.getCellSize() - y) / 2);
         gameOver.draw();
 
-        Text gameScore = new Text(0, 0, "You scored: " + score.getCurrentScore() + " points!");
-        gameScore.setColor(Color.WHITE);
+        Text gameScore = new Text(0, 0, "YOU SCORED: " + score.getCurrentScore() + " POINTS!");
+        gameScore.setColor(Color.GREEN);
         gameScore.draw();
 
-        Text gameSessionHighscore = new Text(0, 10, "The current highscore is: " + score.getHighScore() + " points!");
-        gameSessionHighscore.setColor(Color.WHITE);
+        Text gameSessionHighscore = new Text(0, 25, "THE CURRENT HIGHSCORE IS: " + score.getHighScore() + " POINTS!");
+        gameSessionHighscore.setColor(Color.GREEN);
         gameSessionHighscore.draw();
     }
 
@@ -157,23 +143,67 @@ public class Game implements KeyboardHandler {
     }
 
 
-    public static void setCurrentGameSleep(int currentGameSleep) {
-        Game.currentGameSleep = currentGameSleep;
+    private void foodPlacer() {
+        if (!food.isOnField()) {
+            Position position = new Position();
+            while (crashDetector.isOccupied(position, snake)) {
+                position = new Position();
+            }
+            food = createFood();
+            food.placeFood(position);
+        }
     }
 
-    public static int getCurrentGameSleep() {
-        return currentGameSleep;
+
+    private void eatingCheck() {
+        if (crashDetector.checkEating(snake, food)) {
+            snake.setEating(true);
+            food.removeFood();
+            score.setCurrentScore(score.getCurrentScore() + food.getFoodScore());
+            currentScore.setText("SCORE: " + score.getCurrentScore());
+
+            if (food instanceof PowerUp) {
+                ((PowerUp) food).powerup();
+            } else {
+                if (currentGameDelay < 75) {
+                    setSpeed(75);
+                    Snake.setSpeedUp(false);
+                }
+            }
+
+            if (score.getCurrentScore() > score.getHighScore()) {
+                score.setHighScore(score.getCurrentScore());
+                currentHighscore.setText("HIGHSCORE: " + score.getHighScore());
+            }
+        }
     }
 
+
+    private void selfCrashCheck() {
+        if (crashDetector.selfDestruct(snake)) {
+            if (Snake.getSelfCross() <= 0) {
+                snake.setDead(true);
+                System.out.println("You have died!");
+            } else {
+                Snake.setSelfCross(Snake.getSelfCross() - 1);
+                updateSelfCrossText();
+            }
+        }
+    }
+
+    public static void setSpeed(int delay) {
+        Game.currentGameDelay = delay;
+        Game.gameTimer.setDelay(delay);
+        Game.keyboardTimer.setDelay(delay);
+    }
 
     public static void updateSelfCrossText() {
         selfCrossLeft.setText("SELFCROSS: " + Snake.getSelfCross());
     }
 
-
     private void setKeyboard() {
         k = new Keyboard(this);
-        KeyboardEvent[] events = new KeyboardEvent[5];
+        KeyboardEvent[] events = new KeyboardEvent[6];
 
         for (int i = 0; i < events.length; i++) {
             events[i] = new KeyboardEvent();
@@ -184,6 +214,7 @@ public class Game implements KeyboardHandler {
         events[2].setKey(KeyboardEvent.KEY_LEFT);
         events[3].setKey(KeyboardEvent.KEY_RIGHT);
         events[4].setKey(KeyboardEvent.KEY_R);
+        events[5].setKey(KeyboardEvent.KEY_P);
 
         for (KeyboardEvent event : events) {
             event.setKeyboardEventType(KeyboardEventType.KEY_PRESSED);
@@ -191,36 +222,53 @@ public class Game implements KeyboardHandler {
         }
     }
 
-
     @Override
     public void keyPressed(KeyboardEvent keyboardEvent) {
         switch (keyboardEvent.getKey()) {
             case KeyboardEvent.KEY_UP:
                 if (snake.getDirection() != Directions.DOWN) {
-                    snake.setDirection(Directions.UP);
+                    MovementQueue.add(Directions.UP);
                 }
                 break;
 
             case KeyboardEvent.KEY_DOWN:
                 if (snake.getDirection() != Directions.UP) {
-                    snake.setDirection(Directions.DOWN);
+                    MovementQueue.add(Directions.DOWN);
                 }
                 break;
 
             case KeyboardEvent.KEY_LEFT:
                 if (snake.getDirection() != Directions.RIGHT) {
-                    snake.setDirection(Directions.LEFT);
+                    MovementQueue.add(Directions.LEFT);
                 }
                 break;
 
             case KeyboardEvent.KEY_RIGHT:
                 if (snake.getDirection() != Directions.LEFT) {
-                    snake.setDirection(Directions.RIGHT);
+                    MovementQueue.add(Directions.RIGHT);
                 }
                 break;
 
             case KeyboardEvent.KEY_R:
-                play = true;
+                if(!play) {
+                    start();
+                    moveTimer();
+                    play = true;
+                }
+                break;
+
+            case KeyboardEvent.KEY_P:
+                if(!pause) {
+                    keyboardTimer.stop();
+                    gameTimer.stop();
+                    pause = true;
+                } else {
+                    keyboardTimer.start();
+                    gameTimer.start();
+                    setSpeed(currentGameDelay);
+                    pause = false;
+                }
+                break;
         }
     }
 
