@@ -20,7 +20,7 @@ public class Wall {
                 position.getRow() * Map.getCellSize(),
                 Map.getCellSize(),
                 Map.getCellSize());
-        representation.setColor(Color.WHITE);
+        representation.setColor(Color.BLUE);
         representation.fill();
     }
 

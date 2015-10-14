@@ -12,7 +12,7 @@ public class CrossWall extends Food implements PowerUp {
     public CrossWall() {
         super();
         setFoodScore(50);
-        setColor(Color.BLUE);
+        setColor(Color.GRAY);
     }
 
 

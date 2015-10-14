@@ -7,6 +7,7 @@ import org.academia.latehours.position.Position;
 import org.academia.latehours.snake.Directions;
 import org.academia.latehours.snake.Snake;
 import org.academiadecodigo.simplegraphics.graphics.Color;
+import org.academiadecodigo.simplegraphics.graphics.Rectangle;
 import org.academiadecodigo.simplegraphics.graphics.Text;
 import org.academiadecodigo.simplegraphics.keyboard.Keyboard;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardEvent;
@@ -29,24 +30,57 @@ public class Game implements KeyboardHandler {
     private Keyboard k;
     private CrashDetector crashDetector = new CrashDetector();
     private Score score;
-    private static int level;
+    private static int level = 0;
     private boolean play = true;
+    private boolean start = false;
     private boolean pause = false;
     private Text currentScore;
     private Text currentHighscore;
+    private Text currentLevel;
+    private Text starting;
+    private Text instructions;
+    private Text levelSelected;
     private static Text selfCrossLeft;
     private static Text wallCrossLeft;
     private static int currentGameDelay;
     private static Timer gameTimer;
     private static Timer keyboardTimer;
     private MovementQueue movement;
+    private Color textsColor = Color.RED;
 
 
-    public void init(int level) {
-        if(k == null) {
-            setKeyboard();
-        }
-        this.level = level;
+
+    public void initialScreen() {
+        setKeyboard();
+        Rectangle screen = new Rectangle(0, 0,
+                Map.getCols() * Map.getCellSize(),
+                Map.getRows() * Map.getCellSize());
+        screen.setColor(Color.BLACK);
+        screen.fill();
+
+        starting = new Text(Map.getCols()/2 * Map.getCellSize(), 17 * Map.getCellSize(), "SNAKE");
+        starting.translate(-starting.getWidth() / 2, 0);
+        starting.setColor(Color.GREEN);
+        starting.draw();
+
+        instructions = new Text(Map.getCols()/2 * Map.getCellSize(), 19 * Map.getCellSize(), "Choose the level with 0-9. Press Space to start.");
+        instructions.translate(-instructions.getWidth() / 2, 0);
+        instructions.setColor(Color.GREEN);
+        instructions.draw();
+
+        levelSelected = new Text(Map.getCols()/2 * Map.getCellSize(), 21 * Map.getCellSize(), "Level 0");
+        levelSelected.translate(-levelSelected.getWidth() / 2, 0);
+        levelSelected.setColor(Color.GREEN);
+        levelSelected.draw();
+    }
+
+    public void init() {
+        //if(k == null) {
+        //    setKeyboard();
+        //}
+        starting.delete();
+        instructions.delete();
+        levelSelected.delete();
         currentGameDelay = 75;
         score = new Score();
         map = new Map();
@@ -56,25 +90,30 @@ public class Game implements KeyboardHandler {
     }
 
 
-    public void start(int level) {
-        init(level);
+    public void start() {
+        init();
         score.setCurrentScore(0);
         score.loadHighScore();
 
         currentScore = new Text(0, 0, "SCORE: " + score.getCurrentScore());
-        currentScore.setColor(Color.GREEN);
+        currentScore.setColor(textsColor);
         currentScore.draw();
 
         currentHighscore = new Text(100, 0, "HIGHSCORE: " + score.getHighScore());
-        currentHighscore.setColor(Color.GREEN);
+        currentHighscore.setColor(textsColor);
         currentHighscore.draw();
 
-        selfCrossLeft = new Text(500, 0, "SNAKECROSS: " + Snake.getSelfCross());
-        selfCrossLeft.setColor(Color.GREEN);
+        currentLevel = new Text(Map.getCols()/2 * Map.getCellSize(), 0, "LEVEL " + level);
+        currentLevel.translate(-currentLevel.getWidth() / 2, 0);
+        currentLevel.setColor(Color.RED);
+        currentLevel.draw();
+
+        selfCrossLeft = new Text(520, 0, "SNAKECROSS: " + Snake.getSelfCross());
+        selfCrossLeft.setColor(textsColor);
         selfCrossLeft.draw();
 
         wallCrossLeft = new Text(400, 0, "WALLCROSS: " + Snake.getWallCross());
-        wallCrossLeft.setColor(Color.GREEN);
+        wallCrossLeft.setColor(textsColor);
         wallCrossLeft.draw();
     }
 
@@ -110,8 +149,8 @@ public class Game implements KeyboardHandler {
     }
 
 
-    public void run(int level) throws InterruptedException {
-        start(level);
+    public void run() throws InterruptedException {
+        start();
         moveTimer();
         keyboardTimer();
     }
@@ -120,6 +159,7 @@ public class Game implements KeyboardHandler {
     public void gameOverScreen() {
         currentScore.delete();
         currentHighscore.delete();
+        currentLevel.delete();
         selfCrossLeft.delete();
         wallCrossLeft.delete();
         score.saveHighScore();
@@ -131,11 +171,11 @@ public class Game implements KeyboardHandler {
         gameOver.draw();
 
         Text gameScore = new Text(0, 0, "YOU SCORED: " + score.getCurrentScore() + " POINTS!");
-        gameScore.setColor(Color.GREEN);
+        gameScore.setColor(textsColor);
         gameScore.draw();
 
-        Text gameSessionHighscore = new Text(0, 25, "THE CURRENT HIGHSCORE IS: " + score.getHighScore() + " POINTS!");
-        gameSessionHighscore.setColor(Color.GREEN);
+        Text gameSessionHighscore = new Text(0, 25, "THE CURRENT LEVEL HIGHSCORE FOR LEVEL " + level + " IS: " + score.getHighScore() + " POINTS!");
+        gameSessionHighscore.setColor(textsColor);
         gameSessionHighscore.draw();
     }
 
@@ -240,7 +280,7 @@ public class Game implements KeyboardHandler {
 
     private void setKeyboard() {
         k = new Keyboard(this);
-        KeyboardEvent[] events = new KeyboardEvent[6];
+        KeyboardEvent[] events = new KeyboardEvent[17];
 
         for (int i = 0; i < events.length; i++) {
             events[i] = new KeyboardEvent();
@@ -252,6 +292,17 @@ public class Game implements KeyboardHandler {
         events[3].setKey(KeyboardEvent.KEY_RIGHT);
         events[4].setKey(KeyboardEvent.KEY_R);
         events[5].setKey(KeyboardEvent.KEY_P);
+        events[6].setKey(KeyboardEvent.KEY_SPACE);
+        events[7].setKey(KeyboardEvent.KEY_1);
+        events[8].setKey(KeyboardEvent.KEY_2);
+        events[9].setKey(KeyboardEvent.KEY_3);
+        events[10].setKey(KeyboardEvent.KEY_4);
+        events[11].setKey(KeyboardEvent.KEY_5);
+        events[12].setKey(KeyboardEvent.KEY_6);
+        events[13].setKey(KeyboardEvent.KEY_7);
+        events[14].setKey(KeyboardEvent.KEY_8);
+        events[15].setKey(KeyboardEvent.KEY_9);
+        events[16].setKey(KeyboardEvent.KEY_0);
 
         for (KeyboardEvent event : events) {
             event.setKeyboardEventType(KeyboardEventType.KEY_PRESSED);
@@ -288,7 +339,7 @@ public class Game implements KeyboardHandler {
 
             case KeyboardEvent.KEY_R:
                 if(!play) {
-                    start(level);
+                    start();
                     moveTimer();
                     play = true;
                 }
@@ -305,6 +356,67 @@ public class Game implements KeyboardHandler {
                     setSpeed(currentGameDelay);
                     pause = false;
                 }
+                break;
+
+            case KeyboardEvent.KEY_SPACE:
+                try {
+                    if(!start) {
+                        run();
+                        start = true;
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case KeyboardEvent.KEY_0:
+                level = 0;
+                levelSelected.setText("Level 0");
+                break;
+
+            case KeyboardEvent.KEY_1:
+                level = 1;
+                levelSelected.setText("Level 1");
+                break;
+
+            case KeyboardEvent.KEY_2:
+                level = 2;
+                levelSelected.setText("Level 2");
+                break;
+
+            case KeyboardEvent.KEY_3:
+                level = 3;
+                levelSelected.setText("Level 3");
+                break;
+
+            case KeyboardEvent.KEY_4:
+                level = 4;
+                levelSelected.setText("Level 4");
+                break;
+
+            case KeyboardEvent.KEY_5:
+                level = 5;
+                levelSelected.setText("Level 5");
+                break;
+
+            case KeyboardEvent.KEY_6:
+                level = 6;
+                levelSelected.setText("Level 6");
+                break;
+
+            case KeyboardEvent.KEY_7:
+                level = 7;
+                levelSelected.setText("Level 7");
+                break;
+
+            case KeyboardEvent.KEY_8:
+                level = 8;
+                levelSelected.setText("Level 8");
+                break;
+
+            case KeyboardEvent.KEY_9:
+                level = 9;
+                levelSelected.setText("Level 9");
                 break;
         }
     }

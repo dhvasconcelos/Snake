@@ -13,8 +13,8 @@ import java.util.ArrayList;
  */
 public class Map {
 
-    private static int rows = 30;
-    private static int cols = 30;
+    private static int rows = 31;
+    private static int cols = 31;
     private static int cellSize = 20;
     private Rectangle gameBoard;
     private static ArrayList<Wall> walls = new ArrayList<>();
