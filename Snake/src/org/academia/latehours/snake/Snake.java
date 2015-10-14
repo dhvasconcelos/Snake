@@ -20,9 +20,13 @@ public class Snake {
     private boolean dead;
     private static boolean speedUp;
     private static int selfCross;
+    private static int wallCross;
 
 
     public Snake() {
+        speedUp = false;
+        wallCross = 0;
+        selfCross = 0;
         snakeBody = new LinkedList<>();
         BodyParts snakeHead = new BodyParts(Map.getCols() / 2, Map.getRows() / 2);
 
@@ -35,7 +39,6 @@ public class Snake {
         }
 
         snakeBody.add(snakeHead);
-
     }
 
     public void setDirection(Directions direction) {
@@ -155,6 +158,14 @@ public class Snake {
 
     public static void setSelfCross(int selfCross) {
         Snake.selfCross = selfCross;
+    }
+
+    public static int getWallCross() {
+        return wallCross;
+    }
+
+    public static void setWallCross(int wallCross) {
+        Snake.wallCross = wallCross;
     }
 
     public static boolean isSpeedUp() {

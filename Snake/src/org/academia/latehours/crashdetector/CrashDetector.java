@@ -1,9 +1,12 @@
 package org.academia.latehours.crashdetector;
 
+import org.academia.latehours.maps.Map;
 import org.academia.latehours.objects.Food;
+import org.academia.latehours.objects.Wall;
 import org.academia.latehours.position.Position;
 import org.academia.latehours.snake.Snake;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -32,8 +35,23 @@ public class CrashDetector {
         return selfDestruct;
     }
 
+    public boolean isWallHit(Snake snake) {
+        ArrayList<Wall> walls = Map.getWalls();
+        boolean wallHit = false;
+
+        for (int i = 0; i < walls.size() - 1; i++) {
+            if (snake.headPosition().equals(walls.get(i).getPosition())) {
+                wallHit = true;
+                break;
+            }
+        }
+
+        return wallHit;
+    }
+
     public boolean isOccupied(Position position, Snake snake) {
         LinkedList list = snake.getSnakeBody();
+        ArrayList<Wall> walls = Map.getWalls();
         boolean isOccupied = false;
 
         for (int i = 0; i < list.size() - 1; i++) {
@@ -43,6 +61,16 @@ public class CrashDetector {
             }
         }
 
+        for (int j = 0; j < walls.size() - 1; j++) {
+            if (position.equals(walls.get(j).getPosition())) {
+                isOccupied = true;
+                break;
+            }
+        }
+
         return isOccupied;
     }
+
+
+
 }

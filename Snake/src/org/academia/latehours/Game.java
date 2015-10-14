@@ -15,7 +15,6 @@ import org.academiadecodigo.simplegraphics.keyboard.KeyboardHandler;
 import org.academiadecodigo.simplegraphics.pictures.Picture;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
@@ -29,22 +28,27 @@ public class Game implements KeyboardHandler {
     private Food food;
     private Keyboard k;
     private CrashDetector crashDetector = new CrashDetector();
-    private Score score = new Score();
+    private Score score;
+    private static int level;
     private boolean play = true;
     private boolean pause = false;
     private Text currentScore;
     private Text currentHighscore;
     private static Text selfCrossLeft;
-    private static int currentGameDelay = 75;
+    private static Text wallCrossLeft;
+    private static int currentGameDelay;
     private static Timer gameTimer;
     private static Timer keyboardTimer;
     private MovementQueue movement;
 
 
-    public void init() {
+    public void init(int level) {
         if(k == null) {
             setKeyboard();
         }
+        this.level = level;
+        currentGameDelay = 75;
+        score = new Score();
         map = new Map();
         snake = new Snake();
         food = createFood();
@@ -52,9 +56,10 @@ public class Game implements KeyboardHandler {
     }
 
 
-    public void start() {
-        init();
+    public void start(int level) {
+        init(level);
         score.setCurrentScore(0);
+        score.loadHighScore();
 
         currentScore = new Text(0, 0, "SCORE: " + score.getCurrentScore());
         currentScore.setColor(Color.GREEN);
@@ -67,38 +72,37 @@ public class Game implements KeyboardHandler {
         selfCrossLeft = new Text(500, 0, "SNAKECROSS: " + Snake.getSelfCross());
         selfCrossLeft.setColor(Color.GREEN);
         selfCrossLeft.draw();
+
+        wallCrossLeft = new Text(400, 0, "WALLCROSS: " + Snake.getWallCross());
+        wallCrossLeft.setColor(Color.GREEN);
+        wallCrossLeft.draw();
     }
 
     private void moveTimer() {
-        ActionListener actionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                snake.move();
-                snake.setEating(false);
+        ActionListener actionListener = e -> {
+            snake.move();
+            snake.setEating(false);
 
-                foodPlacer();
-                eatingCheck();
-                selfCrashCheck();
+            foodPlacer();
+            eatingCheck();
+            selfCrashCheck();
+            wallCrashCheck();
 
-                if(snake.isDead()) {
-                    gameOverScreen();
-                    play = false;
-                    gameTimer.stop();
-                }
-
+            if(snake.isDead()) {
+                gameOverScreen();
+                play = false;
+                gameTimer.stop();
             }
+
         };
         gameTimer = new Timer(currentGameDelay, actionListener);
         gameTimer.start();
     }
 
     private void keyboardTimer() {
-        ActionListener actionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(movement.size() != 0) {
-                    movement.movementTranslator(movement.poll(), snake);
-                }
+        ActionListener actionListener = e -> {
+            if (movement.size() != 0) {
+                movement.movementTranslator(movement.poll(), snake);
             }
         };
         keyboardTimer = new Timer(currentGameDelay, actionListener);
@@ -106,8 +110,8 @@ public class Game implements KeyboardHandler {
     }
 
 
-    public void run() throws InterruptedException {
-        start();
+    public void run(int level) throws InterruptedException {
+        start(level);
         moveTimer();
         keyboardTimer();
     }
@@ -117,6 +121,8 @@ public class Game implements KeyboardHandler {
         currentScore.delete();
         currentHighscore.delete();
         selfCrossLeft.delete();
+        wallCrossLeft.delete();
+        score.saveHighScore();
 
         Picture gameOver = new Picture(0, 0, "Snake/resources/gameover.jpg");
         int x = gameOver.getMaxX();
@@ -135,10 +141,13 @@ public class Game implements KeyboardHandler {
 
 
     public Food createFood() {
-        if (Math.random() < 0.9) {
+        double probability = Math.random();
+        if (probability < 0.9) {
             return Math.random() > 0.95 ? new RareFood() : new NormalFood();
+        } else if (probability < 0.98){
+            return Math.random() > 0.3 ? new SpeedUp() : new CrossWall();
         } else {
-            return Math.random() > 0.3 ? new SpeedUp() : new CrossSnake();
+            return new CrossSnake();
         }
     }
 
@@ -184,11 +193,34 @@ public class Game implements KeyboardHandler {
             if (Snake.getSelfCross() <= 0) {
                 snake.setDead(true);
                 System.out.println("You have died!");
+
             } else {
                 Snake.setSelfCross(Snake.getSelfCross() - 1);
                 updateSelfCrossText();
             }
         }
+    }
+
+    private void wallCrashCheck() {
+        if (crashDetector.isWallHit(snake)) {
+            if (Snake.getWallCross() <= 0 && !Snake.isSpeedUp()) {
+                snake.setDead(true);
+                System.out.println("You have died!");
+
+            } else if(Snake.isSpeedUp()) {
+                map.wallDelete(snake.headPosition());
+                setSpeed(currentGameDelay + 25);
+                Snake.setSpeedUp(false);
+
+            } else {
+                Snake.setWallCross(Snake.getWallCross() - 1);
+                updateWallCrossText();
+            }
+        }
+    }
+
+    public static int getLevel() {
+        return level;
     }
 
     public static void setSpeed(int delay) {
@@ -200,6 +232,11 @@ public class Game implements KeyboardHandler {
     public static void updateSelfCrossText() {
         selfCrossLeft.setText("SELFCROSS: " + Snake.getSelfCross());
     }
+
+    public static void updateWallCrossText() {
+        wallCrossLeft.setText("WALLCROSS: " + Snake.getWallCross());
+    }
+
 
     private void setKeyboard() {
         k = new Keyboard(this);
@@ -251,7 +288,7 @@ public class Game implements KeyboardHandler {
 
             case KeyboardEvent.KEY_R:
                 if(!play) {
-                    start();
+                    start(level);
                     moveTimer();
                     play = true;
                 }
