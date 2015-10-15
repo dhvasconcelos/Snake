@@ -39,7 +39,7 @@ public class CrashDetector {
         ArrayList<Wall> walls = Map.getWalls();
         boolean wallHit = false;
 
-        for (int i = 0; i < walls.size() - 1; i++) {
+        for (int i = 0; i < walls.size(); i++) {
             if (snake.headPosition().equals(walls.get(i).getPosition())) {
                 wallHit = true;
                 break;
@@ -54,14 +54,14 @@ public class CrashDetector {
         ArrayList<Wall> walls = Map.getWalls();
         boolean isOccupied = false;
 
-        for (int i = 0; i < list.size() - 1; i++) {
+        for (int i = 0; i < list.size(); i++) {
             if (position.equals(snake.bodyPartPosition(i))) {
                 isOccupied = true;
                 break;
             }
         }
 
-        for (int j = 0; j < walls.size() - 1; j++) {
+        for (int j = 0; j < walls.size(); j++) {
             if (position.equals(walls.get(j).getPosition())) {
                 isOccupied = true;
                 break;

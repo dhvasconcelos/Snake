@@ -31,28 +31,37 @@ public class Game implements KeyboardHandler {
     private CrashDetector crashDetector = new CrashDetector();
     private Score score;
     private static int level = 0;
+    private Rectangle screen;
     private boolean play = true;
     private boolean start = false;
     private boolean pause = false;
+    private boolean fromInitialScreen;
     private Text currentScore;
     private Text currentHighscore;
     private Text currentLevel;
     private Text starting;
-    private Text instructions;
+    private Text inicialInstructions;
     private Text levelSelected;
+    private Text paused;
     private static Text selfCrossLeft;
     private static Text wallCrossLeft;
+    private Text gameScore;
+    private Text levelHighscore;
+    private Text gameOverInstructions;
     private static int currentGameDelay;
+    private Picture gameOverPicture;
     private static Timer gameTimer;
     private static Timer keyboardTimer;
     private MovementQueue movement;
     private Color textsColor = Color.RED;
 
 
-
     public void initialScreen() {
-        setKeyboard();
-        Rectangle screen = new Rectangle(0, 0,
+        if(k == null) {
+            setKeyboard();
+        }
+        fromInitialScreen = true;
+        screen = new Rectangle(0, 0,
                 Map.getCols() * Map.getCellSize(),
                 Map.getRows() * Map.getCellSize());
         screen.setColor(Color.BLACK);
@@ -63,24 +72,32 @@ public class Game implements KeyboardHandler {
         starting.setColor(Color.GREEN);
         starting.draw();
 
-        instructions = new Text(Map.getCols()/2 * Map.getCellSize(), 19 * Map.getCellSize(), "Choose the level with 0-9. Press Space to start.");
-        instructions.translate(-instructions.getWidth() / 2, 0);
-        instructions.setColor(Color.GREEN);
-        instructions.draw();
+        inicialInstructions = new Text(Map.getCols()/2 * Map.getCellSize(), 19 * Map.getCellSize(), "Choose the level with 0-9. Press Space to start.");
+        inicialInstructions.translate(-inicialInstructions.getWidth() / 2, 0);
+        inicialInstructions.setColor(Color.GREEN);
+        inicialInstructions.draw();
 
-        levelSelected = new Text(Map.getCols()/2 * Map.getCellSize(), 21 * Map.getCellSize(), "Level 0");
+        levelSelected = new Text(Map.getCols()/2 * Map.getCellSize(), 21 * Map.getCellSize(), "Level " + level);
         levelSelected.translate(-levelSelected.getWidth() / 2, 0);
         levelSelected.setColor(Color.GREEN);
         levelSelected.draw();
+    }
+
+    public void deleteInitialScreen() {
+        starting.delete();
+        inicialInstructions.delete();
+        levelSelected.delete();
+        screen.delete();
     }
 
     public void init() {
         //if(k == null) {
         //    setKeyboard();
         //}
-        starting.delete();
-        instructions.delete();
-        levelSelected.delete();
+        if(fromInitialScreen) {
+            deleteInitialScreen();
+            fromInitialScreen = false;
+        }
         currentGameDelay = 75;
         score = new Score();
         map = new Map();
@@ -88,7 +105,6 @@ public class Game implements KeyboardHandler {
         food = createFood();
         movement = new MovementQueue();
     }
-
 
     public void start() {
         init();
@@ -128,9 +144,7 @@ public class Game implements KeyboardHandler {
             wallCrashCheck();
 
             if(snake.isDead()) {
-                gameOverScreen();
-                play = false;
-                gameTimer.stop();
+                gameOver();
             }
 
         };
@@ -148,35 +162,55 @@ public class Game implements KeyboardHandler {
         keyboardTimer.start();
     }
 
-
-    public void run() throws InterruptedException {
+    public void run(){
         start();
         moveTimer();
         keyboardTimer();
     }
 
-
-    public void gameOverScreen() {
+    public void gameOver() {
         currentScore.delete();
         currentHighscore.delete();
         currentLevel.delete();
         selfCrossLeft.delete();
         wallCrossLeft.delete();
+        gameTimer.stop();
+        keyboardTimer.stop();
         score.saveHighScore();
+        movement.deleteMovements();
+        play = false;
+        gameOverScreen();
+    }
 
-        Picture gameOver = new Picture(0, 0, "Snake/resources/gameover.jpg");
-        int x = gameOver.getMaxX();
-        int y = gameOver.getMaxY();
-        gameOver.translate((Map.getCols() * Map.getCellSize() - x) / 2, (Map.getRows() * Map.getCellSize() - y) / 2);
-        gameOver.draw();
+    public void gameOverScreen() {
 
-        Text gameScore = new Text(0, 0, "YOU SCORED: " + score.getCurrentScore() + " POINTS!");
+        gameOverPicture = new Picture(0, 0, "Snake/resources/gameover.jpg");
+        int x = gameOverPicture.getMaxX();
+        int y = gameOverPicture.getMaxY();
+        gameOverPicture.translate((Map.getCols() * Map.getCellSize() - x) / 2, (Map.getRows() * Map.getCellSize() - y) / 2);
+        gameOverPicture.draw();
+
+        gameScore = new Text(Map.getCols()/2 * Map.getCellSize(), 0, "YOU SCORED: " + score.getCurrentScore() + " POINTS!");
+        gameScore.translate(-gameScore.getWidth() / 2, 0);
         gameScore.setColor(textsColor);
         gameScore.draw();
 
-        Text gameSessionHighscore = new Text(0, 25, "THE CURRENT LEVEL HIGHSCORE FOR LEVEL " + level + " IS: " + score.getHighScore() + " POINTS!");
-        gameSessionHighscore.setColor(textsColor);
-        gameSessionHighscore.draw();
+        levelHighscore = new Text(Map.getCols()/2 * Map.getCellSize(), 25, "THE HIGHSCORE FOR LEVEL " + level + " IS: " + score.getHighScore() + " POINTS!");
+        levelHighscore.translate(-levelHighscore.getWidth() / 2, 0);
+        levelHighscore.setColor(textsColor);
+        levelHighscore.draw();
+
+        gameOverInstructions = new Text(Map.getCols()/2 * Map.getCellSize(), 23 * Map.getCellSize(), "OR PRESS SPACE TO RETURN TO LEVEL SELECT PAGE");
+        gameOverInstructions.translate(-gameOverInstructions.getWidth() / 2, 0);
+        gameOverInstructions.setColor(Color.GREEN);
+        gameOverInstructions.draw();
+    }
+
+    public void deleteGameOverScreen() {
+        gameOverPicture.delete();
+        gameScore.delete();
+        levelHighscore.delete();
+        gameOverInstructions.delete();
     }
 
 
@@ -277,7 +311,6 @@ public class Game implements KeyboardHandler {
         wallCrossLeft.setText("WALLCROSS: " + Snake.getWallCross());
     }
 
-
     private void setKeyboard() {
         k = new Keyboard(this);
         KeyboardEvent[] events = new KeyboardEvent[17];
@@ -314,34 +347,35 @@ public class Game implements KeyboardHandler {
     public void keyPressed(KeyboardEvent keyboardEvent) {
         switch (keyboardEvent.getKey()) {
             case KeyboardEvent.KEY_UP:
-                if (snake.getDirection() != Directions.DOWN) {
-                    MovementQueue.add(Directions.UP);
+                if (snake.getDirection() != Directions.DOWN && play) {
+                    movement.add(Directions.UP);
                 }
                 break;
 
             case KeyboardEvent.KEY_DOWN:
-                if (snake.getDirection() != Directions.UP) {
-                    MovementQueue.add(Directions.DOWN);
+                if (snake.getDirection() != Directions.UP && play) {
+                    movement.add(Directions.DOWN);
                 }
                 break;
 
             case KeyboardEvent.KEY_LEFT:
-                if (snake.getDirection() != Directions.RIGHT) {
-                    MovementQueue.add(Directions.LEFT);
+                if (snake.getDirection() != Directions.RIGHT && play) {
+                    movement.add(Directions.LEFT);
                 }
                 break;
 
             case KeyboardEvent.KEY_RIGHT:
-                if (snake.getDirection() != Directions.LEFT) {
-                    MovementQueue.add(Directions.RIGHT);
+                if (snake.getDirection() != Directions.LEFT && play) {
+                    movement.add(Directions.RIGHT);
                 }
                 break;
 
             case KeyboardEvent.KEY_R:
                 if(!play) {
-                    start();
-                    moveTimer();
                     play = true;
+                    map.mapDelete();
+                    deleteGameOverScreen();
+                    run();
                 }
                 break;
 
@@ -349,81 +383,88 @@ public class Game implements KeyboardHandler {
                 if(!pause) {
                     keyboardTimer.stop();
                     gameTimer.stop();
+                    paused = new Text(Map.getCols()/2 * Map.getCellSize(), 17 * Map.getCellSize(), "GAME PAUSED");
+                    paused.translate(-paused.getWidth() / 2, 0);
+                    paused.setColor(Color.RED);
+                    paused.draw();
                     pause = true;
                 } else {
                     keyboardTimer.start();
                     gameTimer.start();
                     setSpeed(currentGameDelay);
+                    paused.delete();
                     pause = false;
                 }
                 break;
 
             case KeyboardEvent.KEY_SPACE:
-                try {
                     if(!start) {
-                        run();
                         start = true;
+                        run();
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if(start && !play) {
+                    start = false;
+                    play = true;
+                    map.mapDelete();
+                    deleteGameOverScreen();
+                    initialScreen();
                 }
                 break;
 
             case KeyboardEvent.KEY_0:
                 level = 0;
-                levelSelected.setText("Level 0");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_1:
                 level = 1;
-                levelSelected.setText("Level 1");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_2:
                 level = 2;
-                levelSelected.setText("Level 2");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_3:
                 level = 3;
-                levelSelected.setText("Level 3");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_4:
                 level = 4;
-                levelSelected.setText("Level 4");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_5:
                 level = 5;
-                levelSelected.setText("Level 5");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_6:
                 level = 6;
-                levelSelected.setText("Level 6");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_7:
                 level = 7;
-                levelSelected.setText("Level 7");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_8:
                 level = 8;
-                levelSelected.setText("Level 8");
+                levelSelected.setText("Level " + level);
                 break;
 
             case KeyboardEvent.KEY_9:
                 level = 9;
-                levelSelected.setText("Level 9");
+                levelSelected.setText("Level " + level);
                 break;
         }
     }
 
     @Override
     public void keyReleased(KeyboardEvent keyboardEvent) {
-
     }
 
 }

@@ -17,7 +17,7 @@ public class Map {
     private static int cols = 31;
     private static int cellSize = 20;
     private Rectangle gameBoard;
-    private static ArrayList<Wall> walls = new ArrayList<>();
+    private static ArrayList<Wall> walls;
     private MapLoader mapLoader;
 
     public Map() {
@@ -37,6 +37,7 @@ public class Map {
     }
 
     public void wallCreator() {
+        walls = new ArrayList<>();
         int[][] wallLocations = mapLoader.fileRead();
         for (int j = 0; j < cols; j++) {
             for (int i = 0; i < rows; i++) {
@@ -49,11 +50,18 @@ public class Map {
     }
 
     public void wallDelete(Position position) {
-        for (int i = 0; i < walls.size() - 1; i++) {
+        for (int i = 0; i < walls.size(); i++) {
             if (walls.get(i).getPosition().equals(position)) {
                 walls.get(i).deleteRepresentation();
                 walls.remove(i);
             }
+        }
+    }
+
+    public void mapDelete() {
+        gameBoard.delete();
+        for (int i = 0; i < walls.size(); i++) {
+                walls.remove(i);
         }
     }
 
@@ -74,4 +82,7 @@ public class Map {
         return walls;
     }
 
+    public static void deleteWalls() {
+        walls = null;
+    }
 }

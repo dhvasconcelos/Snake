@@ -22,9 +22,12 @@ public class MapLoader {
     }
 
     public int[][] fileRead() {
-        int[][] mapInt = new int[Map.getCols()][Map.getRows()];
-        for (int i = 0; i < Map.getRows(); i++) {
-            for (int j = 0; j < Map.getCols(); j++) {
+        int[][] mapInt = new int[Map.getCols() + 1][Map.getRows() + 1];
+        //int[][] mapInt = new int[Map.getCols()][Map.getRows()]; //use in mac
+        //for (int i = 0; i < Map.getRows(); i++) { //use in mac
+        for (int i = 0; i <= Map.getRows(); i++) {
+            //for (int j = 0; j < Map.getCols(); j++) { //use in mac
+            for (int j = 0; j <= Map.getCols(); j++) {
                 try {
                     int character = mapReader.read();
                     if(character != 10) {

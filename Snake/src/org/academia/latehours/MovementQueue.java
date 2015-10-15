@@ -10,9 +10,9 @@ import java.util.Queue;
  * Created by cadet on 12/10/15.
  */
 public class MovementQueue {
-    private static Queue<Directions> movements = new PriorityQueue<>();
+    private Queue<Directions> movements = new PriorityQueue<>();
 
-    public static void add(Directions direction) {
+    public void add(Directions direction) {
         movements.add(direction);
     }
 
@@ -52,4 +52,9 @@ public class MovementQueue {
     public int size() {
         return movements.size();
     }
+
+    public void deleteMovements() {
+        movements.clear();
+    }
 }
+
