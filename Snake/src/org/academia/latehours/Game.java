@@ -380,34 +380,26 @@ public class Game implements KeyboardHandler {
     public void keyPressed(KeyboardEvent keyboardEvent) {
         switch (keyboardEvent.getKey()) {
             case KeyboardEvent.KEY_UP:
-                if(!snakeStarted) {
-                    if (snake.getDirection() != Directions.DOWN && play) {
-                        movement.add(Directions.UP);
-                    }
+                if (!snakeStarted && snake.getDirection() != Directions.DOWN && play) {
+                    movement.add(Directions.UP);
                 }
                 break;
 
             case KeyboardEvent.KEY_DOWN:
-                if(!snakeStarted) {
-                    if (snake.getDirection() != Directions.UP && play) {
-                        movement.add(Directions.DOWN);
-                    }
+                if (!snakeStarted && snake.getDirection() != Directions.UP && play) {
+                    movement.add(Directions.DOWN);
                 }
                 break;
 
             case KeyboardEvent.KEY_LEFT:
-                if(!snakeStarted) {
-                    if (snake.getDirection() != Directions.RIGHT && play) {
-                        movement.add(Directions.LEFT);
-                    }
+                if (!snakeStarted && snake.getDirection() != Directions.RIGHT && play) {
+                    movement.add(Directions.LEFT);
                 }
                 break;
 
             case KeyboardEvent.KEY_RIGHT:
-                if(!snakeStarted) {
-                    if (snake.getDirection() != Directions.LEFT && play) {
-                        movement.add(Directions.RIGHT);
-                    }
+                if (!snakeStarted && snake.getDirection() != Directions.LEFT && play) {
+                    movement.add(Directions.RIGHT);
                 }
                 break;
 
@@ -468,7 +460,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_0:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 0;
                     levelSelected.setText("Level " + level + ": Classic");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -476,7 +468,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_1:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 1;
                     levelSelected.setText("Level " + level + ": Classic walls");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -484,7 +476,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_2:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 2;
                     levelSelected.setText("Level " + level + ": Target Acquired");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -492,7 +484,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_3:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 3;
                     levelSelected.setText("Level " + level + ": Squared");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -500,7 +492,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_4:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 4;
                     levelSelected.setText("Level " + level + ": Pointers");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -508,7 +500,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_5:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 5;
                     levelSelected.setText("Level " + level + ": ZigZag");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -516,7 +508,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_6:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 6;
                     levelSelected.setText("Level " + level + ": Mindfuck");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -524,7 +516,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_7:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 7;
                     levelSelected.setText("Level " + level + ": X Marks the Spot");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -532,7 +524,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_8:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 8;
                     levelSelected.setText("Level " + level + ": Starry Night");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -540,7 +532,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_9:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     level = 9;
                     levelSelected.setText("Level " + level + ": Equals");
                     levelPicture.load("Snake/resources/Level" + level + ".png");
@@ -548,7 +540,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_E:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     initialGameDelay = 100;
                     difficultyLevelSelected.setText("Difficulty: Easy");
                     gameDifficulty = "Easy";
@@ -556,7 +548,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_M:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     initialGameDelay = 75;
                     difficultyLevelSelected.setText("Difficulty: Medium");
                     gameDifficulty = "Medium";
@@ -564,7 +556,7 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_H:
-                if(inInitialScreen && !snakeStarted) {
+                if (inInitialScreen && !snakeStarted) {
                     initialGameDelay = 50;
                     difficultyLevelSelected.setText("Difficulty: Hardcore");
                     gameDifficulty = "Hardcore";
@@ -574,11 +566,15 @@ public class Game implements KeyboardHandler {
             case KeyboardEvent.KEY_Q:
                 System.exit(1);
                 break;
+
+            default:
+                break;
         }
     }
 
     @Override
     public void keyReleased(KeyboardEvent keyboardEvent) {
+        //No key release methods
     }
 
 }

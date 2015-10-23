@@ -13,14 +13,17 @@ import java.util.ArrayList;
  */
 public class Map {
 
-    private static int rows = 31;
-    private static int cols = 31;
-    private static int cellSize = 20;
+    private static int rows;
+    private static int cols;
+    private static int cellSize;
     private Rectangle gameBoard;
     private static ArrayList<Wall> walls;
     private MapLoader mapLoader;
 
     public Map() {
+        rows = 31;
+        cols = 31;
+        cellSize = 20;
         this.gameBoard = new Rectangle(0, 0, cols * cellSize, rows * cellSize);
         this.gameBoard.setColor(Color.BLACK);
         this.gameBoard.fill();

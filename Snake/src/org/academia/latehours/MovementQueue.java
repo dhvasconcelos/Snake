@@ -42,10 +42,12 @@ public class MovementQueue {
                 }
                 break;
 
+            default:
+                break;
         }
     }
 
-    public Directions poll(){
+    public Directions poll() {
         return movements.poll();
     }
 

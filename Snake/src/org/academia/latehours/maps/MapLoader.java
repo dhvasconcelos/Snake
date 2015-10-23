@@ -11,7 +11,7 @@ import java.net.URL;
  */
 public class MapLoader {
 
-    InputStreamReader mapReader;
+    private InputStreamReader mapReader;
 
     public MapLoader(String filePath) {
 
@@ -32,23 +32,23 @@ public class MapLoader {
     }
 
     public int[][] fileRead() {
-       // if(System.getProperty("os.name").matches("Mac.*")) {
-            int[][] mapInt = new int[Map.getCols()][Map.getRows()]; //use in mac
-            for (int i = 0; i < Map.getRows(); i++) {
-                for (int j = 0; j < Map.getCols(); j++) {
-                    try {
-                        int character = mapReader.read();
-                        if (character != 10) {
-                            mapInt[j][i] = character;
-                        } else {
-                            j--;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+        // if(System.getProperty("os.name").matches("Mac.*")) {
+        int[][] mapInt = new int[Map.getCols()][Map.getRows()]; //use in mac
+        for (int i = 0; i < Map.getRows(); i++) {
+            for (int j = 0; j < Map.getCols(); j++) {
+                try {
+                    int character = mapReader.read();
+                    if (character != 10) {
+                        mapInt[j][i] = character;
+                    } else {
+                        j--;
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-            return mapInt;
+        }
+        return mapInt;
 
         /*} else {
             int[][] mapInt = new int[Map.getCols() + 1][Map.getRows() + 1];

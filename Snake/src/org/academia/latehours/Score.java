@@ -45,7 +45,7 @@ public class Score {
         try {
             URL url = getClass().getResource(file.startsWith("/") ? file : "/" + file);
 
-            if(url != null) {
+            if (url != null) {
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(url.openStream()));
                 String score = buffer.readLine();
                 highScore = Integer.parseInt(score);
