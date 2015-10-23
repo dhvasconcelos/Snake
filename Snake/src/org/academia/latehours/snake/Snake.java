@@ -18,9 +18,9 @@ public class Snake {
     private Directions direction = Directions.LEFT;
     private boolean eating;
     private boolean dead;
-    private static boolean speedUp;
-    private static int selfCross;
-    private static int wallCross;
+    private static boolean speedUp = false;
+    private static int selfCross = 0;
+    private static int wallCross = 0;
 
 
     public Snake() {
