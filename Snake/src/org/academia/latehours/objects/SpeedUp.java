@@ -17,7 +17,7 @@ public class SpeedUp extends Food implements PowerUp {
 
     @Override
     public void powerup() {
-        Game.setSpeed(50);
+        Game.setSpeed(Game.getInitialGameDelay() - 25);
         Snake.setSpeedUp(true);
     }
 

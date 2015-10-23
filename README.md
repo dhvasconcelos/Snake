@@ -14,6 +14,8 @@ Features:
     Wall cross powerup.
     Multiple levels.
     Highscore saving per level.
+    Main menu with level selection.
+    Initial screen.
     
 
 Power Up list:

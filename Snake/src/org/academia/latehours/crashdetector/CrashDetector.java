@@ -17,7 +17,7 @@ public class CrashDetector {
 
     public boolean checkEating(Snake snake, Food food) {
 
-        return snake.headPosition().equals(food.getPosition()) ? true : false;
+        return snake.headPosition().equals(food.getPosition());
 
     }
 

@@ -7,7 +7,6 @@ import org.academia.latehours.position.Position;
 import org.academia.latehours.snake.Directions;
 import org.academia.latehours.snake.Snake;
 import org.academiadecodigo.simplegraphics.graphics.Color;
-import org.academiadecodigo.simplegraphics.graphics.Rectangle;
 import org.academiadecodigo.simplegraphics.graphics.Text;
 import org.academiadecodigo.simplegraphics.keyboard.Keyboard;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardEvent;
@@ -31,25 +30,31 @@ public class Game implements KeyboardHandler {
     private CrashDetector crashDetector = new CrashDetector();
     private Score score;
     private static int level = 0;
-    private Rectangle screen;
+    private Picture screen;
+    private Picture gameOverPicture;
+    private Picture levelPicture;
+    private Picture pausePicture;
     private boolean play = true;
     private boolean start = false;
     private boolean pause = false;
     private boolean fromInitialScreen;
+    private boolean inInitialScreen;
+    private boolean snakeStarted;
+    private static String gameDifficulty = "Easy";
     private Text currentScore;
     private Text currentHighscore;
     private Text currentLevel;
     private Text starting;
     private Text inicialInstructions;
     private Text levelSelected;
-    private Text paused;
+    private Text difficultyLevelSelected;
+    private Text pauseInstructions;
     private static Text selfCrossLeft;
     private static Text wallCrossLeft;
     private Text gameScore;
     private Text levelHighscore;
-    private Text gameOverInstructions;
     private static int currentGameDelay;
-    private Picture gameOverPicture;
+    private static int initialGameDelay = 100;
     private static Timer gameTimer;
     private static Timer keyboardTimer;
     private MovementQueue movement;
@@ -57,48 +62,64 @@ public class Game implements KeyboardHandler {
 
 
     public void initialScreen() {
-        if(k == null) {
+        if (k == null) {
             setKeyboard();
         }
-        fromInitialScreen = true;
-        screen = new Rectangle(0, 0,
-                Map.getCols() * Map.getCellSize(),
-                Map.getRows() * Map.getCellSize());
-        screen.setColor(Color.BLACK);
-        screen.fill();
 
-        starting = new Text(Map.getCols()/2 * Map.getCellSize(), 17 * Map.getCellSize(), "SNAKE");
+        snakeStarted = true;
+        fromInitialScreen = true;
+        inInitialScreen = true;
+        screen = new Picture(0, 0, "Snake/resources/hardcore-snake.png");
+        screen.draw();
+
+        starting = new Text(Map.getCols() / 2 * Map.getCellSize() + 20, 23 * Map.getCellSize(), "PRESS SPACE TO FOR LEVEL SELECTION");
         starting.translate(-starting.getWidth() / 2, 0);
         starting.setColor(Color.GREEN);
         starting.draw();
 
-        inicialInstructions = new Text(Map.getCols()/2 * Map.getCellSize(), 19 * Map.getCellSize(), "Choose the level with 0-9. Press Space to start.");
+    }
+
+    public void levelSelectionScreen() {
+        snakeStarted = false;
+        level = 0;
+
+        inicialInstructions = new Text(Map.getCols() / 2 * Map.getCellSize() + 20, 19 * Map.getCellSize(), "Choose the level with 0-9. Choose difficulty with E, M or H.");
         inicialInstructions.translate(-inicialInstructions.getWidth() / 2, 0);
         inicialInstructions.setColor(Color.GREEN);
         inicialInstructions.draw();
 
-        levelSelected = new Text(Map.getCols()/2 * Map.getCellSize(), 21 * Map.getCellSize(), "Level " + level);
+        levelSelected = new Text(Map.getCols() / 2 * Map.getCellSize() + 50, 23 * Map.getCellSize(), "Level " + level + ": Classic");
         levelSelected.translate(-levelSelected.getWidth() / 2, 0);
         levelSelected.setColor(Color.GREEN);
         levelSelected.draw();
+
+        difficultyLevelSelected = new Text(Map.getCols() / 2 * Map.getCellSize() + 50, 25 * Map.getCellSize(), "Difficulty: " + gameDifficulty);
+        difficultyLevelSelected.translate(-difficultyLevelSelected.getWidth() / 2, 0);
+        difficultyLevelSelected.setColor(Color.GREEN);
+        difficultyLevelSelected.draw();
+
+        levelPicture = new Picture(5 * Map.getCellSize(), 21 * Map.getCellSize(), "Snake/resources/Level" + level + ".png");
+        levelPicture.draw();
     }
 
     public void deleteInitialScreen() {
-        starting.delete();
         inicialInstructions.delete();
         levelSelected.delete();
+        difficultyLevelSelected.delete();
         screen.delete();
+        levelPicture.delete();
     }
 
     public void init() {
         //if(k == null) {
         //    setKeyboard();
         //}
-        if(fromInitialScreen) {
+        inInitialScreen = false;
+        if (fromInitialScreen) {
             deleteInitialScreen();
             fromInitialScreen = false;
         }
-        currentGameDelay = 75;
+        currentGameDelay = initialGameDelay;
         score = new Score();
         map = new Map();
         snake = new Snake();
@@ -119,7 +140,7 @@ public class Game implements KeyboardHandler {
         currentHighscore.setColor(textsColor);
         currentHighscore.draw();
 
-        currentLevel = new Text(Map.getCols()/2 * Map.getCellSize(), 0, "LEVEL " + level);
+        currentLevel = new Text(Map.getCols() / 2 * Map.getCellSize(), 0, "LEVEL " + level);
         currentLevel.translate(-currentLevel.getWidth() / 2, 0);
         currentLevel.setColor(Color.RED);
         currentLevel.draw();
@@ -131,6 +152,10 @@ public class Game implements KeyboardHandler {
         wallCrossLeft = new Text(400, 0, "WALLCROSS: " + Snake.getWallCross());
         wallCrossLeft.setColor(textsColor);
         wallCrossLeft.draw();
+
+        pauseInstructions = new Text(0, 600, "PRESS P TO PAUSE");
+        pauseInstructions.setColor(textsColor);
+        pauseInstructions.draw();
     }
 
     private void moveTimer() {
@@ -143,7 +168,7 @@ public class Game implements KeyboardHandler {
             selfCrashCheck();
             wallCrashCheck();
 
-            if(snake.isDead()) {
+            if (snake.isDead()) {
                 gameOver();
             }
 
@@ -162,7 +187,7 @@ public class Game implements KeyboardHandler {
         keyboardTimer.start();
     }
 
-    public void run(){
+    public void run() {
         start();
         moveTimer();
         keyboardTimer();
@@ -178,39 +203,35 @@ public class Game implements KeyboardHandler {
         keyboardTimer.stop();
         score.saveHighScore();
         movement.deleteMovements();
+        pauseInstructions.delete();
         play = false;
         gameOverScreen();
     }
 
     public void gameOverScreen() {
 
-        gameOverPicture = new Picture(0, 0, "Snake/resources/gameover.jpg");
+        gameOverPicture = new Picture(0, 0, "Snake/resources/gameover.png");
         int x = gameOverPicture.getMaxX();
         int y = gameOverPicture.getMaxY();
         gameOverPicture.translate((Map.getCols() * Map.getCellSize() - x) / 2, (Map.getRows() * Map.getCellSize() - y) / 2);
         gameOverPicture.draw();
 
-        gameScore = new Text(Map.getCols()/2 * Map.getCellSize(), 0, "YOU SCORED: " + score.getCurrentScore() + " POINTS!");
+        gameScore = new Text(Map.getCols() / 2 * Map.getCellSize(), 0, "YOU SCORED: " + score.getCurrentScore() + " POINTS!");
         gameScore.translate(-gameScore.getWidth() / 2, 0);
         gameScore.setColor(textsColor);
         gameScore.draw();
 
-        levelHighscore = new Text(Map.getCols()/2 * Map.getCellSize(), 25, "THE HIGHSCORE FOR LEVEL " + level + " IS: " + score.getHighScore() + " POINTS!");
+        levelHighscore = new Text(Map.getCols() / 2 * Map.getCellSize(), 25, "THE HIGHSCORE FOR LEVEL " + level + " IS: " + score.getHighScore() + " POINTS!");
         levelHighscore.translate(-levelHighscore.getWidth() / 2, 0);
         levelHighscore.setColor(textsColor);
         levelHighscore.draw();
 
-        gameOverInstructions = new Text(Map.getCols()/2 * Map.getCellSize(), 23 * Map.getCellSize(), "OR PRESS SPACE TO RETURN TO LEVEL SELECT PAGE");
-        gameOverInstructions.translate(-gameOverInstructions.getWidth() / 2, 0);
-        gameOverInstructions.setColor(Color.GREEN);
-        gameOverInstructions.draw();
     }
 
     public void deleteGameOverScreen() {
         gameOverPicture.delete();
         gameScore.delete();
         levelHighscore.delete();
-        gameOverInstructions.delete();
     }
 
 
@@ -218,7 +239,7 @@ public class Game implements KeyboardHandler {
         double probability = Math.random();
         if (probability < 0.9) {
             return Math.random() > 0.95 ? new RareFood() : new NormalFood();
-        } else if (probability < 0.98){
+        } else if (probability < 0.98) {
             return Math.random() > 0.3 ? new SpeedUp() : new CrossWall();
         } else {
             return new CrossSnake();
@@ -248,8 +269,8 @@ public class Game implements KeyboardHandler {
             if (food instanceof PowerUp) {
                 ((PowerUp) food).powerup();
             } else {
-                if (currentGameDelay < 75) {
-                    setSpeed(75);
+                if (currentGameDelay < initialGameDelay) {
+                    setSpeed(initialGameDelay);
                     Snake.setSpeedUp(false);
                 }
             }
@@ -281,9 +302,9 @@ public class Game implements KeyboardHandler {
                 snake.setDead(true);
                 System.out.println("You have died!");
 
-            } else if(Snake.isSpeedUp()) {
+            } else if (Snake.isSpeedUp()) {
                 map.wallDelete(snake.headPosition());
-                setSpeed(currentGameDelay + 25);
+                setSpeed(initialGameDelay);
                 Snake.setSpeedUp(false);
 
             } else {
@@ -295,6 +316,14 @@ public class Game implements KeyboardHandler {
 
     public static int getLevel() {
         return level;
+    }
+
+    public static int getInitialGameDelay() {
+        return initialGameDelay;
+    }
+
+    public static String getGameDifficulty() {
+        return gameDifficulty;
     }
 
     public static void setSpeed(int delay) {
@@ -313,7 +342,7 @@ public class Game implements KeyboardHandler {
 
     private void setKeyboard() {
         k = new Keyboard(this);
-        KeyboardEvent[] events = new KeyboardEvent[17];
+        KeyboardEvent[] events = new KeyboardEvent[21];
 
         for (int i = 0; i < events.length; i++) {
             events[i] = new KeyboardEvent();
@@ -336,6 +365,10 @@ public class Game implements KeyboardHandler {
         events[14].setKey(KeyboardEvent.KEY_8);
         events[15].setKey(KeyboardEvent.KEY_9);
         events[16].setKey(KeyboardEvent.KEY_0);
+        events[17].setKey(KeyboardEvent.KEY_M);
+        events[18].setKey(KeyboardEvent.KEY_H);
+        events[19].setKey(KeyboardEvent.KEY_E);
+        events[20].setKey(KeyboardEvent.KEY_Q);
 
         for (KeyboardEvent event : events) {
             event.setKeyboardEventType(KeyboardEventType.KEY_PRESSED);
@@ -347,31 +380,39 @@ public class Game implements KeyboardHandler {
     public void keyPressed(KeyboardEvent keyboardEvent) {
         switch (keyboardEvent.getKey()) {
             case KeyboardEvent.KEY_UP:
-                if (snake.getDirection() != Directions.DOWN && play) {
-                    movement.add(Directions.UP);
+                if(!snakeStarted) {
+                    if (snake.getDirection() != Directions.DOWN && play) {
+                        movement.add(Directions.UP);
+                    }
                 }
                 break;
 
             case KeyboardEvent.KEY_DOWN:
-                if (snake.getDirection() != Directions.UP && play) {
-                    movement.add(Directions.DOWN);
+                if(!snakeStarted) {
+                    if (snake.getDirection() != Directions.UP && play) {
+                        movement.add(Directions.DOWN);
+                    }
                 }
                 break;
 
             case KeyboardEvent.KEY_LEFT:
-                if (snake.getDirection() != Directions.RIGHT && play) {
-                    movement.add(Directions.LEFT);
+                if(!snakeStarted) {
+                    if (snake.getDirection() != Directions.RIGHT && play) {
+                        movement.add(Directions.LEFT);
+                    }
                 }
                 break;
 
             case KeyboardEvent.KEY_RIGHT:
-                if (snake.getDirection() != Directions.LEFT && play) {
-                    movement.add(Directions.RIGHT);
+                if(!snakeStarted) {
+                    if (snake.getDirection() != Directions.LEFT && play) {
+                        movement.add(Directions.RIGHT);
+                    }
                 }
                 break;
 
             case KeyboardEvent.KEY_R:
-                if(!play) {
+                if (!play) {
                     play = true;
                     map.mapDelete();
                     deleteGameOverScreen();
@@ -380,29 +421,44 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_P:
-                if(!pause) {
-                    keyboardTimer.stop();
-                    gameTimer.stop();
-                    paused = new Text(Map.getCols()/2 * Map.getCellSize(), 17 * Map.getCellSize(), "GAME PAUSED");
-                    paused.translate(-paused.getWidth() / 2, 0);
-                    paused.setColor(Color.RED);
-                    paused.draw();
-                    pause = true;
-                } else {
-                    keyboardTimer.start();
-                    gameTimer.start();
-                    setSpeed(currentGameDelay);
-                    paused.delete();
-                    pause = false;
+                if (play && !snakeStarted) {
+                    if (!pause) {
+                        keyboardTimer.stop();
+                        gameTimer.stop();
+                        pausePicture = new Picture(0, 0, "Snake/resources/paused.png");
+                        pausePicture.draw();
+                        pause = true;
+                    } else {
+                        keyboardTimer.start();
+                        gameTimer.start();
+                        setSpeed(currentGameDelay);
+                        pausePicture.delete();
+                        pause = false;
+                    }
                 }
                 break;
 
             case KeyboardEvent.KEY_SPACE:
-                    if(!start) {
-                        start = true;
-                        run();
-                    }
-                if(start && !play) {
+                if (snakeStarted) {
+                    starting.delete();
+                    levelSelectionScreen();
+
+                } else if (!start && !snakeStarted) {
+                    start = true;
+                    run();
+                }
+
+                if (pause) {
+                    gameOver();
+                    pause = false;
+                    start = false;
+                    play = true;
+                    map.mapDelete();
+                    deleteGameOverScreen();
+                    initialScreen();
+                }
+
+                if (start && !play && !snakeStarted) {
                     start = false;
                     play = true;
                     map.mapDelete();
@@ -412,53 +468,111 @@ public class Game implements KeyboardHandler {
                 break;
 
             case KeyboardEvent.KEY_0:
-                level = 0;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 0;
+                    levelSelected.setText("Level " + level + ": Classic");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_1:
-                level = 1;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 1;
+                    levelSelected.setText("Level " + level + ": Classic walls");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_2:
-                level = 2;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 2;
+                    levelSelected.setText("Level " + level + ": Target Acquired");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_3:
-                level = 3;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 3;
+                    levelSelected.setText("Level " + level + ": Squared");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_4:
-                level = 4;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 4;
+                    levelSelected.setText("Level " + level + ": Pointers");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_5:
-                level = 5;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 5;
+                    levelSelected.setText("Level " + level + ": ZigZag");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_6:
-                level = 6;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 6;
+                    levelSelected.setText("Level " + level + ": Mindfuck");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_7:
-                level = 7;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 7;
+                    levelSelected.setText("Level " + level + ": X Marks the Spot");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_8:
-                level = 8;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 8;
+                    levelSelected.setText("Level " + level + ": Starry Night");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
                 break;
 
             case KeyboardEvent.KEY_9:
-                level = 9;
-                levelSelected.setText("Level " + level);
+                if(inInitialScreen && !snakeStarted) {
+                    level = 9;
+                    levelSelected.setText("Level " + level + ": Equals");
+                    levelPicture.load("Snake/resources/Level" + level + ".png");
+                }
+                break;
+
+            case KeyboardEvent.KEY_E:
+                if(inInitialScreen && !snakeStarted) {
+                    initialGameDelay = 100;
+                    difficultyLevelSelected.setText("Difficulty: Easy");
+                    gameDifficulty = "Easy";
+                }
+                break;
+
+            case KeyboardEvent.KEY_M:
+                if(inInitialScreen && !snakeStarted) {
+                    initialGameDelay = 75;
+                    difficultyLevelSelected.setText("Difficulty: Medium");
+                    gameDifficulty = "Medium";
+                }
+                break;
+
+            case KeyboardEvent.KEY_H:
+                if(inInitialScreen && !snakeStarted) {
+                    initialGameDelay = 50;
+                    difficultyLevelSelected.setText("Difficulty: Hardcore");
+                    gameDifficulty = "Hardcore";
+                }
+                break;
+
+            case KeyboardEvent.KEY_Q:
+                System.exit(1);
                 break;
         }
     }

@@ -37,11 +37,11 @@ public class Map {
     }
 
     public void wallCreator() {
-        walls = new ArrayList<>();
+        this.walls = new ArrayList<>();
         int[][] wallLocations = mapLoader.fileRead();
         for (int j = 0; j < cols; j++) {
             for (int i = 0; i < rows; i++) {
-                if(wallLocations[j][i] == '#') {
+                if (wallLocations[j][i] == '#') {
                     Position position = new Position(j, i);
                     walls.add(new Wall(position));
                 }
@@ -61,7 +61,7 @@ public class Map {
     public void mapDelete() {
         gameBoard.delete();
         for (int i = 0; i < walls.size(); i++) {
-                walls.remove(i);
+            walls.remove(i);
         }
     }
 

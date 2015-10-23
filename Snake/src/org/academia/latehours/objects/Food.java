@@ -14,7 +14,7 @@ public abstract class Food {
     private int foodScore;
     private Position position;
     private Rectangle gameFood;
-    private Color color = Color.ORANGE;
+    private Color color = Color.WHITE;
 
     public int getFoodScore() {
         return foodScore;

@@ -1,6 +1,7 @@
 package org.academia.latehours;
 
 import java.io.*;
+import java.net.URL;
 
 /**
  * Created by cadet on 07/10/15.
@@ -11,7 +12,7 @@ public class Score {
     private String file;
 
     public Score() {
-        file = new String("Snake/resources/highscore" + Game.getLevel() + ".txt");
+        file = new String("highscore" + Game.getLevel() + Game.getGameDifficulty() + ".txt");
     }
 
     public int getCurrentScore() {
@@ -42,9 +43,19 @@ public class Score {
 
     public void loadHighScore() {
         try {
-            BufferedReader buffer = new BufferedReader(new FileReader(file));
-            String score = buffer.readLine();
-            highScore = Integer.parseInt(score);
+            URL url = getClass().getResource(file.startsWith("/") ? file : "/" + file);
+
+            if(url != null) {
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(url.openStream()));
+                String score = buffer.readLine();
+                highScore = Integer.parseInt(score);
+
+            } else {
+                BufferedReader buffer = new BufferedReader(new FileReader(file));
+                String score = buffer.readLine();
+                highScore = Integer.parseInt(score);
+            }
+
         } catch (IOException e) {
 
             try {
@@ -56,6 +67,7 @@ public class Score {
                 e1.printStackTrace();
             }
         }
+
     }
 }
 
